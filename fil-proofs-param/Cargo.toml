@@ -63,8 +63,7 @@ failure = "0.1.7"
 tempfile = "3"
 
 [features]
-#default = ["gpu", "pairing"]
-default = ["gpu"]
+default = ["gpu", "pairing"]
 cpu-profile = ["gperftools"]
 heap-profile = ["gperftools/heap"]
 simd = ["storage-proofs-core/simd"]
@@ -73,4 +72,5 @@ gpu = ["storage-proofs-core/gpu", "storage-proofs-porep/gpu", "storage-proofs-po
 gpu2 = ["storage-proofs-core/gpu2", "storage-proofs-porep/gpu2", "storage-proofs-post/gpu2", "bellperson/gpu"]
 #pairing = ["storage-proofs-core/pairing", "storage-proofs-porep/pairing", "storage-proofs-post/pairing", "bellperson/pairing"]
 #blst = ["storage-proofs-core/blst", "storage-proofs-porep/blst", "storage-proofs-post/blst", "bellperson/blst"]
-pairing = []
+pairing = ["storage-proofs-core/pairing", "storage-proofs-porep/pairing", "storage-proofs-post/pairing"]
+blst = ["storage-proofs-core/blst", "storage-proofs-porep/blst", "storage-proofs-post/blst"]
