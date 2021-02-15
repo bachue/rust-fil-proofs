@@ -683,9 +683,11 @@ pub fn aggregate_seal_commit_proofs<Tree: 'static + MerkleTreeTrait>(
         "proof count for aggregation is larger than the max supported value"
     );
 
-    let srs = get_stacked_srs_key::<Tree>(porep_config, proofs.len())?;
-    let aggregate_proof =
-        StackedCompound::<Tree, DefaultPieceHasher>::aggregate_proofs(&srs, proofs.as_slice())?;
+    let srs_keys = get_stacked_srs_key::<Tree>(porep_config, proofs.len())?;
+    let aggregate_proof = StackedCompound::<Tree, DefaultPieceHasher>::aggregate_proofs(
+        &srs_keys.prover_srs,
+        proofs.as_slice(),
+    )?;
     let aggregate_proof_bytes = serialize(&aggregate_proof)?;
 
     info!("aggregate_seal_commit_proofs:finish");
@@ -710,14 +712,15 @@ pub fn verify_aggregate_seal_commit_proofs<Tree: 'static + MerkleTreeTrait>(
 
     ensure!(commit_inputs.len() > 1, "cannot aggregate a single proof");
 
-    let aggregate_proof: groth16::AggregateProof<Bls12> = deserialize(&aggregate_proof_bytes)?;
+    let aggregate_proof: groth16::aggregate::AggregateProof<Bls12> =
+        deserialize(&aggregate_proof_bytes)?;
 
     let verifying_key = get_stacked_verifying_key::<Tree>(porep_config)?;
-    let srs = get_stacked_srs_key::<Tree>(porep_config, aggregated_proofs_len)?;
+    let srs_keys = get_stacked_srs_key::<Tree>(porep_config, aggregated_proofs_len)?;
 
     info!("start verifying aggregate proof");
     let result = StackedCompound::<Tree, DefaultPieceHasher>::verify_aggregate_proofs(
-        &srs.get_verifier_key(),
+        &srs_keys.verifier_srs,
         &verifying_key,
         commit_inputs.as_slice(),
         &aggregate_proof,

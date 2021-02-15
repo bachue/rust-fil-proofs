@@ -316,18 +316,21 @@ where
         _circuit: C,
         pub_params: &P,
         num_proofs_to_aggregate: usize,
-    ) -> Result<groth16::SRS<Bls12>> {
+    ) -> Result<groth16::aggregate::GenericSRS<Bls12>> {
         let id = Self::cache_identifier(pub_params);
         let cache_path =
             ensure_ancestor_dirs_exist(parameter_cache_srs_key_path(&id, num_proofs_to_aggregate))?;
 
-        let generate = || -> Result<groth16::SRS<Bls12>> {
+        let generate = || -> Result<groth16::aggregate::GenericSRS<Bls12>> {
             if let Some(rng) = rng {
                 info!(
-                    "setup_inner_product called with {} [max {}] proofs to aggregate",
+                    "get_inner_product called with {} [max {}] proofs to aggregate",
                     num_proofs_to_aggregate, SRS_MAX_PROOFS_TO_AGGREGATE
                 );
-                Ok(groth16::setup_inner_product(rng, num_proofs_to_aggregate))
+                Ok(groth16::aggregate::setup_fake_srs(
+                    rng,
+                    num_proofs_to_aggregate,
+                ))
             } else {
                 bail!(
                     "No cached srs key found for {} [failure finding {}]",
@@ -467,13 +470,15 @@ fn read_cached_verifying_key(
     })
 }
 
-fn read_cached_srs_key(cache_entry_path: &PathBuf) -> io::Result<groth16::SRS<Bls12>> {
+fn read_cached_srs_key(
+    cache_entry_path: &PathBuf,
+) -> io::Result<groth16::aggregate::GenericSRS<Bls12>> {
     info!("checking cache_path: {:?} for srs", cache_entry_path);
 
     // FIXME: add srs parameters to manifest and verify them if specified
     with_exclusive_read_lock(cache_entry_path, |file| {
         let srs_map = unsafe { MmapOptions::new().map(file.as_ref())? };
-        let key = groth16::SRS::read_mmap(&srs_map)?;
+        let key = groth16::aggregate::GenericSRS::read_mmap(&srs_map)?;
         info!("read srs key from cache {:?} ", cache_entry_path);
 
         Ok(key)
@@ -517,8 +522,8 @@ fn write_cached_verifying_key(
 
 fn write_cached_srs_key(
     cache_entry_path: &PathBuf,
-    value: groth16::SRS<Bls12>,
-) -> io::Result<groth16::SRS<Bls12>> {
+    value: groth16::aggregate::GenericSRS<Bls12>,
+) -> io::Result<groth16::aggregate::GenericSRS<Bls12>> {
     with_exclusive_lock(cache_entry_path, |mut file| {
         value.write(&mut file)?;
         file.flush()?;

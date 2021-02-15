@@ -18,4 +18,6 @@ fff = { git = "https://github.com/filecoin-project/ff", branch = "ser-de" }
 groupy = { git = "https://github.com/filecoin-project/group", branch = "ser-de" }
 blstrs = { git = "https://github.com/filecoin-project/blstrs", branch = "ser-de" }
 #bellperson = { git = "https://github.com/filecoin-project/bellperson", branch = "feat-aggregation", default-features = false }
-bellperson = { git = "https://github.com/cryptonemo/bellman", branch = "feat-aggregation", default-features = false }
+#bellperson = { git = "https://github.com/cryptonemo/bellman", branch = "feat-aggregation", default-features = false }
+bellperson = { git = "https://github.com/filecoin-project/bellman", branch = "feat-ipp2" }
+

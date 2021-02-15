@@ -21,12 +21,18 @@ use crate::{
 
 type Bls12GrothParams = groth16::MappedParameters<Bls12>;
 pub type Bls12PreparedVerifyingKey = groth16::PreparedVerifyingKey<Bls12>;
-type Bls12SRSKey = groth16::SRS<Bls12>;
+type Bls12ProverSRSKey = groth16::aggregate::ProverSRS<Bls12>;
+type Bls12VerifierSRSKey = groth16::aggregate::VerifierSRS<Bls12>;
+
+pub struct Bls12SRSKeys {
+    pub prover_srs: Bls12ProverSRSKey,
+    pub verifier_srs: Bls12VerifierSRSKey,
+}
 
 type Cache<G> = HashMap<String, Arc<G>>;
 type GrothMemCache = Cache<Bls12GrothParams>;
 type VerifyingKeyMemCache = Cache<Bls12PreparedVerifyingKey>;
-type SRSKeyMemCache = Cache<Bls12SRSKey>;
+type SRSKeyMemCache = Cache<Bls12SRSKeys>;
 
 lazy_static! {
     static ref GROTH_PARAM_MEMORY_CACHE: Mutex<GrothMemCache> = Default::default();
@@ -86,9 +92,9 @@ where
 }
 
 #[inline]
-pub fn lookup_srs_key<F>(identifier: String, generator: F) -> Result<Arc<Bls12SRSKey>>
+pub fn lookup_srs_key<F>(identifier: String, generator: F) -> Result<Arc<Bls12SRSKeys>>
 where
-    F: FnOnce() -> Result<Bls12SRSKey>,
+    F: FnOnce() -> Result<Bls12SRSKeys>,
 {
     let srs_identifier = format!("{}-srs-key", &identifier);
     cache_lookup(&*SRS_KEY_MEMORY_CACHE, srs_identifier, generator)
@@ -241,7 +247,7 @@ pub fn get_post_verifying_key<Tree: 'static + MerkleTreeTrait>(
 pub fn get_stacked_srs_key<Tree: 'static + MerkleTreeTrait>(
     porep_config: PoRepConfig,
     num_proofs_to_aggregate: usize,
-) -> Result<Arc<Bls12SRSKey>> {
+) -> Result<Arc<Bls12SRSKeys>> {
     let public_params = public_params(
         PaddedBytesAmount::from(porep_config),
         usize::from(PoRepProofPartitions::from(porep_config)),
@@ -256,19 +262,23 @@ pub fn get_stacked_srs_key<Tree: 'static + MerkleTreeTrait>(
         use rand::SeedableRng;
         use rand_xorshift::XorShiftRng;
         let rng = &mut XorShiftRng::from_seed(TEST_SEED);
-        let srs = <StackedCompound<Tree, DefaultPieceHasher> as CompoundProof<
-            StackedDrg<'_, Tree, DefaultPieceHasher>,
-            _,
-        >>::srs_key::<rand_xorshift::XorShiftRng>(
-            Some(rng),
-            &public_params,
-            num_proofs_to_aggregate,
-        )?;
+        let (prover_srs, verifier_srs) =
+            <StackedCompound<Tree, DefaultPieceHasher> as CompoundProof<
+                StackedDrg<'_, Tree, DefaultPieceHasher>,
+                _,
+            >>::srs_key::<rand_xorshift::XorShiftRng>(
+                Some(rng),
+                &public_params,
+                num_proofs_to_aggregate,
+            )?;
         // FIXME: END TESTING
         //////////////////////////////////////////////
         //>>::srs_key::<rand::rngs::OsRng>(None, &public_params, num_proofs_to_aggregate)?;
 
-        Ok(srs)
+        Ok(Bls12SRSKeys {
+            prover_srs,
+            verifier_srs,
+        })
     };
 
     Ok(lookup_srs_key(
