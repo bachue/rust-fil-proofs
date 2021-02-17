@@ -18,8 +18,8 @@ use crate::{
     caches::{get_post_params, get_post_verifying_key},
     parameters::window_post_setup_params,
     types::{
-        AggregateSnarkProof, ChallengeSeed, FallbackPoStSectorProof, PoStConfig,
-        PrivateReplicaInfo, ProverId, PublicReplicaInfo, SnarkProof,
+        ChallengeSeed, FallbackPoStSectorProof, PoStConfig, PrivateReplicaInfo, ProverId,
+        PublicReplicaInfo, SnarkProof,
     },
     PoStType,
 };
@@ -244,35 +244,4 @@ pub fn verify_window_post<Tree: 'static + MerkleTreeTrait>(
     info!("verify_window_post:finish");
 
     Ok(true)
-}
-
-/// Generates an aggregated Window proof-of-spacetime.
-pub fn generate_aggregated_window_post<Tree: 'static + MerkleTreeTrait>(
-    post_config: &PoStConfig,
-    //_replicas_len: usize, // only needed if we pass in proof bytes (instead of multi proof)
-    _proofs: &[MultiProof<'_>],
-    //snark_proofs: &[SnarkProof],
-) -> Result<AggregateSnarkProof> {
-    info!("generate_aggregated_window_post:start");
-    ensure!(
-        post_config.typ == PoStType::Window,
-        "invalid post config type"
-    );
-
-    todo!()
-}
-
-/// Generates an aggregated Window proof-of-spacetime.
-pub fn verify_aggregated_window_post<Tree: 'static + MerkleTreeTrait>(
-    post_config: &PoStConfig,
-    _aggregated_proofs_len: usize,
-    _aggregate_proof_bytes: AggregateSnarkProof,
-) -> Result<bool> {
-    info!("verify_aggregated_window_post:start");
-    ensure!(
-        post_config.typ == PoStType::Window,
-        "invalid post config type"
-    );
-
-    todo!()
 }

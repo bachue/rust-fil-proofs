@@ -256,24 +256,13 @@ pub fn get_stacked_srs_key<Tree: 'static + MerkleTreeTrait>(
     )?;
 
     let srs_generator = || {
-        //////////////////////////////////////////////
-        // FIXME: TESTING ONLY -- RNG MUST BE REMOVED
-        use crate::TEST_SEED;
-        use rand::SeedableRng;
-        use rand_xorshift::XorShiftRng;
-        let rng = &mut XorShiftRng::from_seed(TEST_SEED);
         let (prover_srs, verifier_srs) =
             <StackedCompound<Tree, DefaultPieceHasher> as CompoundProof<
                 StackedDrg<'_, Tree, DefaultPieceHasher>,
                 _,
-            >>::srs_key::<rand_xorshift::XorShiftRng>(
-                Some(rng),
-                &public_params,
-                num_proofs_to_aggregate,
+            >>::srs_key::<rand::rngs::OsRng>(
+                None, &public_params, num_proofs_to_aggregate
             )?;
-        // FIXME: END TESTING
-        //////////////////////////////////////////////
-        //>>::srs_key::<rand::rngs::OsRng>(None, &public_params, num_proofs_to_aggregate)?;
 
         Ok(Bls12SRSKeys {
             prover_srs,
@@ -290,58 +279,3 @@ pub fn get_stacked_srs_key<Tree: 'static + MerkleTreeTrait>(
         srs_generator,
     )?)
 }
-
-/*
-pub fn get_post_srs_key<Tree: 'static + MerkleTreeTrait>(
-    post_config: &PoStConfig,
-    num_proofs_to_aggregate: usize,
-) -> Result<Arc<Bls12SRSKey>> {
-    let post_public_params = winning_post_public_params::<Tree>(post_config)?;
-    match post_config.typ {
-        PoStType::Winning => {
-            let srs_generator = || {
-                let srs = <fallback::FallbackPoStCompound<Tree> as CompoundProof<
-                    fallback::FallbackPoSt<'_, Tree>,
-                    fallback::FallbackPoStCircuit<Tree>,
-                >>::srs_key::<rand::rngs::OsRng>(
-                    None,
-                    &post_public_params,
-                    num_proofs_to_aggregate,
-                )?;
-                Ok(srs)
-            };
-
-            Ok(lookup_srs_key(
-                format!(
-                    "WINNING_POST[{}]",
-                    usize::from(post_config.padded_sector_size())
-                ),
-                srs_generator,
-            )?)
-        }
-        PoStType::Window => {
-            let post_public_params = window_post_public_params::<Tree>(post_config)?;
-
-            let srs_generator = || {
-                let srs = <fallback::FallbackPoStCompound<Tree> as CompoundProof<
-                    fallback::FallbackPoSt<'_, Tree>,
-                    fallback::FallbackPoStCircuit<Tree>,
-                >>::srs_key::<rand::rngs::OsRng>(
-                    None,
-                    &post_public_params,
-                    num_proofs_to_aggregate,
-                )?;
-                Ok(srs)
-            };
-
-            Ok(lookup_srs_key(
-                format!(
-                    "WINDOW_POST[{}]",
-                    usize::from(post_config.padded_sector_size())
-                ),
-                srs_generator,
-            )?)
-        }
-    }
-}
-*/

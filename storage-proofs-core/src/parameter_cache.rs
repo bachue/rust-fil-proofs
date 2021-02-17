@@ -30,6 +30,7 @@ pub const GROTH_PARAMETER_EXT: &str = "params";
 pub const PARAMETER_METADATA_EXT: &str = "meta";
 pub const VERIFYING_KEY_EXT: &str = "vk";
 pub const SRS_KEY_EXT: &str = "srs";
+pub const SRS_SHARED_KEY_NAME: &str = "fil-inner-product-v1";
 
 #[derive(Debug)]
 pub struct LockedFile(File);
@@ -178,13 +179,13 @@ pub fn parameter_cache_verifying_key_path(parameter_set_identifier: &str) -> Pat
 }
 
 pub fn parameter_cache_srs_key_path(
-    parameter_set_identifier: &str,
-    num_proofs_to_aggregate: usize,
+    _parameter_set_identifier: &str,
+    _num_proofs_to_aggregate: usize,
 ) -> PathBuf {
     let dir = Path::new(&parameter_cache_dir_name()).to_path_buf();
     dir.join(format!(
-        "v{}-{}-{}.{}",
-        VERSION, parameter_set_identifier, num_proofs_to_aggregate, SRS_KEY_EXT
+        "v{}-{}.{}",
+        VERSION, SRS_SHARED_KEY_NAME, SRS_KEY_EXT
     ))
 }
 

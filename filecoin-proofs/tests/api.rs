@@ -240,6 +240,42 @@ fn test_seal_proof_aggregation_8_2kib_porep_id_v1_1_base_8() -> Result<()> {
 
 #[test]
 #[ignore]
+fn test_seal_proof_aggregation_2_4kib_porep_id_v1_1_base_8() -> Result<()> {
+    let proofs_to_aggregate = 2;
+
+    let mut porep_id = ARBITRARY_POREP_ID_V1_1_0;
+    assert!(!is_legacy_porep_id(porep_id));
+    let verified = aggregate_proofs::<SectorShape4KiB>(
+        SECTOR_SIZE_4_KIB,
+        &porep_id,
+        ApiVersion::V1_1_0,
+        proofs_to_aggregate,
+    )?;
+    assert!(verified);
+
+    Ok(())
+}
+
+#[test]
+#[ignore]
+fn test_seal_proof_aggregation_4_32kib_porep_id_v1_1_base_8() -> Result<()> {
+    let proofs_to_aggregate = 4;
+
+    let mut porep_id = ARBITRARY_POREP_ID_V1_1_0;
+    assert!(!is_legacy_porep_id(porep_id));
+    let verified = aggregate_proofs::<SectorShape32KiB>(
+        SECTOR_SIZE_32_KIB,
+        &porep_id,
+        ApiVersion::V1_1_0,
+        proofs_to_aggregate,
+    )?;
+    assert!(verified);
+
+    Ok(())
+}
+
+#[test]
+#[ignore]
 fn test_seal_proof_aggregation_1024_2kib_porep_id_v1_1_base_8() -> Result<()> {
     let proofs_to_aggregate = 1024;
     inner_test_seal_proof_aggregation_2kib_porep_id_v1_1_base_8(proofs_to_aggregate)
